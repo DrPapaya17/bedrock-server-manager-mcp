@@ -1,0 +1,402 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Bedrock Server Manager API",
+    "description": "REST API for Bedrock Server Manager (BSM) to install, manage, and monitor Minecraft Bedrock Dedicated Servers.",
+    "version": "4.0.0"
+  },
+  "paths": {
+    "/auth/token": {
+      "post": {
+        "summary": "Obtain JWT Access Token",
+        "description": "Authenticate using username and password to receive a Bearer JWT access token.",
+        "operationId": "obtain_token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" },
+                  "remember_me": { "type": "boolean", "default": false }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": { "type": "string" },
+                    "token_type": { "type": "string", "example": "bearer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/application/all_servers_data": {
+      "get": {
+        "summary": "List All Servers Data",
+        "description": "Retrieve overview and operational status for all managed Minecraft Bedrock servers.",
+        "operationId": "list_all_servers",
+        "responses": {
+          "200": {
+            "description": "Detailed server status dictionary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "servers": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/application/system_and_app_info": {
+      "get": {
+        "summary": "Get System and Application Info",
+        "description": "Retrieve host system resource usage, OS details, and BSM application version.",
+        "operationId": "get_system_info",
+        "responses": {
+          "200": {
+            "description": "System and app information"
+          }
+        }
+      }
+    },
+    "/api/server/{server_name}/status": {
+      "get": {
+        "summary": "Get Server Status",
+        "description": "Get detailed runtime status, CPU/RAM usage, and active player counts for a specific server.",
+        "operationId": "get_server_status",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the Minecraft Bedrock server",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Server status" }
+        }
+      }
+    },
+    "/api/server/{server_name}/start": {
+      "post": {
+        "summary": "Start Server",
+        "description": "Start a stopped Minecraft Bedrock Dedicated Server.",
+        "operationId": "start_server",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the server to start",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Start command accepted" }
+        }
+      }
+    },
+    "/api/server/{server_name}/stop": {
+      "post": {
+        "summary": "Stop Server",
+        "description": "Gracefully stop a running Minecraft Bedrock Dedicated Server.",
+        "operationId": "stop_server",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the server to stop",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Stop command accepted" }
+        }
+      }
+    },
+    "/api/server/{server_name}/restart": {
+      "post": {
+        "summary": "Restart Server",
+        "description": "Restart a running Minecraft Bedrock Dedicated Server.",
+        "operationId": "restart_server",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the server to restart",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Restart command accepted" }
+        }
+      }
+    },
+    "/api/server/{server_name}/send_command": {
+      "post": {
+        "summary": "Send Console Command",
+        "description": "Execute a console command on a running Minecraft server (e.g. 'say Hello', 'whitelist on', 'time set day').",
+        "operationId": "send_command",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the target server",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "command": {
+                    "type": "string",
+                    "description": "The command string to execute in server console"
+                  }
+                },
+                "required": ["command"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Command executed" }
+        }
+      }
+    },
+    "/api/server/{server_name}/backup": {
+      "post": {
+        "summary": "Create Server Backup",
+        "description": "Create a hot backup of the specified Minecraft server's world and configuration.",
+        "operationId": "create_backup",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the server to back up",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Backup created" }
+        }
+      }
+    },
+    "/api/server/{server_name}/backups": {
+      "get": {
+        "summary": "List Server Backups",
+        "description": "List all available backup archives for a specific server.",
+        "operationId": "list_backups",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "description": "The name of the server",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of backups" }
+        }
+      }
+    },
+    "/api/server/{server_name}/allowlist": {
+      "get": {
+        "summary": "Get Allowlist",
+        "description": "Get the allowlist (whitelist) of players permitted to join the server.",
+        "operationId": "get_allowlist",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Current allowlist entries" }
+        }
+      },
+      "post": {
+        "summary": "Add Player to Allowlist",
+        "description": "Add a player by gamertag and optional XUID to the server allowlist.",
+        "operationId": "add_to_allowlist",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Player Gamertag" },
+                  "xuid": { "type": "string", "description": "Optional Xbox Live XUID" },
+                  "ignoresPlayerLimit": { "type": "boolean", "default": false }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Player added to allowlist" }
+        }
+      },
+      "delete": {
+        "summary": "Remove Player from Allowlist",
+        "description": "Remove a player from the server allowlist by gamertag.",
+        "operationId": "remove_from_allowlist",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Player Gamertag" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Player removed from allowlist" }
+        }
+      }
+    },
+    "/api/server/{server_name}/permissions": {
+      "get": {
+        "summary": "Get Server Permissions",
+        "description": "Get player permission levels (visitor, member, operator) configured for the server.",
+        "operationId": "get_permissions",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Server permissions list" }
+        }
+      },
+      "post": {
+        "summary": "Set Player Permission",
+        "description": "Set a player's permission level by XUID.",
+        "operationId": "set_permission",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "xuid": { "type": "string", "description": "Player Xbox Live XUID" },
+                  "permission": {
+                    "type": "string",
+                    "enum": ["visitor", "member", "operator"],
+                    "description": "Role to grant"
+                  }
+                },
+                "required": ["xuid", "permission"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Permission updated" }
+        }
+      }
+    },
+    "/api/server/{server_name}/properties": {
+      "get": {
+        "summary": "Get Server Properties",
+        "description": "Retrieve key-value settings from server.properties (e.g. gamemode, difficulty, max-players, port).",
+        "operationId": "get_properties",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Key-value configuration" }
+        }
+      }
+    },
+    "/api/server/{server_name}/addons": {
+      "get": {
+        "summary": "List Addons",
+        "description": "List all behavior and resource packs installed on the server.",
+        "operationId": "list_addons",
+        "parameters": [
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Addons list" }
+        }
+      }
+    }
+  }
+}
