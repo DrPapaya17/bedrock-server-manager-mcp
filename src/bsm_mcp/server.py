@@ -48,9 +48,12 @@ def load_openapi_spec(cfg: Settings) -> Dict[str, Any]:
 
     # 2. Live fetch from running BSM instance
     live_url = f"{cfg.bsm_url.rstrip('/')}/openapi.json"
-    logger.info("Attempting to fetch live OpenAPI specification from: %s", live_url)
+    headers: Dict[str, str] = {}
+    if cfg.bsm_token:
+        headers["Authorization"] = f"Bearer {cfg.bsm_token}"
+
     try:
-        resp = httpx.get(live_url, timeout=5.0, verify=cfg.bsm_verify_ssl)
+        resp = httpx.get(live_url, headers=headers, timeout=5.0, verify=cfg.bsm_verify_ssl)
         if resp.status_code == 200:
             spec = resp.json()
             logger.info("Successfully fetched live OpenAPI spec with %d paths", len(spec.get("paths", {})))
